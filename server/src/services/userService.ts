@@ -1,6 +1,10 @@
-import bcrypt from "bcrypt";
+import config from "config";
+import { omit } from "lodash";
+import { FilterQuery, QueryOptions } from "mongoose";
 
-import Users, { UserResponse } from "../model/userModel";
+import { excludedFields } from "../controllers/authController";
+import { signJwt } from "../middlewares/jwt";
+import Users, { UserDocument, UserType } from "../model/userModel";
 
 const userService = {
     checkDataRegister: async (username: string, email: string) => {
@@ -18,23 +22,60 @@ const userService = {
         };
     },
 
-    createUser: async (username: string, email: string, password: string) => {
-        const hashedPassword = await bcrypt.hash(password, 10);
+    createUser: async (
+        username: string,
+        email: string,
+        password: string,
+        role: null | string | undefined,
+    ) => {
+        if (role !== "admin") {
+            role = "user";
+        }
+
         const user = await Users.create({
             username,
             email,
-            password: hashedPassword,
+            password,
+            role,
         });
 
-        const User: UserResponse = {
-            username: user.username,
-            email: user.email,
-            isAvatarImageSet: user.isAvatarImageSet,
-            id: user._id,
-            avatarImage: user?.avatarImage,
-        };
+        return omit(user.toJSON(), excludedFields);
+    },
 
-        return User;
+    findUserById: async (id: string) => {
+        const user = await Users.findById(id);
+
+        if (user) {
+            return omit(user, user!.password);
+        }
+
+        return false;
+    },
+
+    findAllUsers: async () => {
+        return await Users.find();
+    },
+
+    findUser: async (query: FilterQuery<UserType>, options: QueryOptions = {}) => {
+        return await Users.findOne(query, {}, options).select("+password");
+    },
+
+    //recebemos um topo userDocument
+    signToken: async (user: UserDocument) => {
+        //vamos com signjwt
+        const access_token = signJwt(
+            { sub: user._id }, // usamos como base do token o id do usuario, bem como
+            {
+                expiresIn: `${config.get<number>("accesTokenExpiresIn")}m`, //setamos o tempo de expiração do token em minutios
+            },
+        );
+
+        //salvamos no redis (versões futuras)
+        // redisClient.set(user._id.toString(), JSON.stringify(user), {
+        //     EX: 60 * 60,
+        // });
+
+        return { access_token };
     },
 };
 

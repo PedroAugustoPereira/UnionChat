@@ -1,20 +1,13 @@
-import 'react-toastify/dist/ReactToastify.css';
+import "react-toastify/dist/ReactToastify.css";
 
-import { useState } from 'react';
+import { useState } from "react";
 
-import {
-  Link,
-  useNavigate,
-} from 'react-router-dom';
-import {
-  toast,
-  ToastContainer,
-  ToastOptions,
-} from 'react-toastify';
-import styled from 'styled-components';
+import { Link, useNavigate } from "react-router-dom";
+import { toast, ToastContainer, ToastOptions } from "react-toastify";
+import styled from "styled-components";
 
-import Logo from '../assets/logo.png';
-import authService, { userRegister } from '../services/authService';
+import Logo from "../assets/logo.png";
+import authService, { userRegister } from "../services/authService";
 
 const toastOptions: ToastOptions = {
   position: "top-right",
@@ -32,6 +25,7 @@ const Register = () => {
     password: "",
     confirmPassword: "",
   });
+  console.log("register");
 
   const handleSubmit = async (data: React.FormEvent) => {
     data.preventDefault();
@@ -46,14 +40,15 @@ const Register = () => {
         confirmPassword,
       });
 
-      if(data.status == false){
-        toast.error(data.msg, toastOptions);
+      console.log(data);
+
+      if (data.status == false) {
+        toast.error(data.message, toastOptions);
       }
-      if(data.status == true){
-        localStorage.setItem("union-app-user",JSON.stringify(data.user));
+      if (data.status == true) {
+        localStorage.setItem("union-app-user", JSON.stringify(data.user));
         navigate("/");
       }
-      
     }
   };
 

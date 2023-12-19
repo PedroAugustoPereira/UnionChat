@@ -1,10 +1,15 @@
-import Api from './Api';
+import Api from "./Api";
 
 export type userRegister = {
   username: string;
   email: string;
   password: string;
   confirmPassword: string;
+};
+
+export type userLogin = {
+  username: string;
+  password: string;
 };
 
 const authService = {
@@ -20,6 +25,18 @@ const authService = {
     };
 
     const res = await Api.post("/api/auth/register", header).catch((err) => {
+      if (err.response.status == 400) {
+        return err.response;
+      }
+
+      return err;
+    });
+
+    return res;
+  },
+
+  login: async (params: userLogin) => {
+    const res = await Api.post("/api/auth/login", params).catch((err) => {
       if (err.response.status == 400) {
         return err.response;
       }

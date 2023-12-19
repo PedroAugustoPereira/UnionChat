@@ -1,10 +1,14 @@
-import "./styles/global.css";
+import './styles/global.css';
 
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import {
+  BrowserRouter,
+  Route,
+  Routes,
+} from 'react-router-dom';
 
-import Chat from "./pages/Chat";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import Chat from './pages/Chat';
+import Login from './pages/Login';
+import Register from './pages/Register';
 
 function App() {
   return (

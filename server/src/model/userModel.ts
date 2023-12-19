@@ -1,6 +1,7 @@
-import mongoose from "mongoose";
+import bcrypt from 'bcrypt';
+import mongoose, { ObjectId } from 'mongoose';
 
-interface User {
+export interface User {
     username: string;
     email: string;
     password: string;
@@ -15,38 +16,80 @@ export interface UserResponse {
     avatarImage?: string;
     id?: any;
 }
+//tipo padrão
+export interface UserDocument extends Document {
+    _id: ObjectId;
+    username: string;
+    email: string;
+    password: string;
+    role?: string;
+    isAvatarImageSet?: boolean;
+    avatarImage?: string;
+
+    comparePassword(candidatePassword: string): Promise<boolean>;
+}
 
 export type UserWithoutPassword = Omit<User, "password">;
 
-const userSchema = new mongoose.Schema<User>({
-    username: {
-        type: String,
-        required: true,
-        min: 3,
-        max: 20,
-        unique: true,
+export const userSchema = new mongoose.Schema<UserDocument>(
+    {
+        username: {
+            type: String,
+            required: true,
+            min: 3,
+            max: 20,
+            unique: true,
+        },
+        email: {
+            type: String,
+            required: true,
+            max: 50,
+            unique: true,
+        },
+        password: {
+            type: String,
+            required: true,
+            min: 8,
+        },
+
+        role: {
+            type: String,
+            default: "user",
+        },
+
+        isAvatarImageSet: {
+            type: Boolean,
+            default: false,
+        },
+        avatarImage: {
+            type: String,
+            default: "",
+        },
     },
-    email: {
-        type: String,
-        required: true,
-        max: 50,
-        unique: true,
+    {
+        timestamps: true,
     },
-    password: {
-        type: String,
-        required: true,
-        min: 8,
-    },
-    isAvatarImageSet: {
-        type: Boolean,
-        default: false,
-    },
-    avatarImage: {
-        type: String,
-        default: "",
-    },
+);
+
+//emcriptar senha
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next();
+
+    this.password = await bcrypt.hash(this.password, 12);
+    next();
 });
 
-const Users = mongoose.model("Users", userSchema);
+//comparar senha
+userSchema.methods.comparePassword = function (candidatePassword: string): Promise<boolean> {
+    return bcrypt.compare(candidatePassword, this.password);
+};
+
+userSchema.index({ email: 1 });
+
+const Users = mongoose.model<UserDocument>("Users", userSchema);
+
+
+//tipo da schema
+export type UserType = typeof userSchema;
 
 export default Users;
