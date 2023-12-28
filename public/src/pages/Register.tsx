@@ -85,7 +85,7 @@ const Register = () => {
   };
 
   const handleValidation = () => {
-    const { username, email, password, confirmPassword } = values;
+    const { username, password, confirmPassword } = values;
 
     if (password !== confirmPassword) {
       toast.error("A senha e a confirmação não estão iguais!", toastOptions);
