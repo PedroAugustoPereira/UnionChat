@@ -1,8 +1,12 @@
-import { NextFunction, Request, Response } from "express";
+import {
+  NextFunction,
+  Request,
+  Response,
+} from 'express';
 
-import userService from "../services/userService";
-import AppError from "../utils/appError";
-import { verifyJwt } from "./jwt";
+import userService from '../services/userService';
+import AppError from '../utils/appError';
+import { verifyJwt } from './jwt';
 
 export const desserializeUser = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -19,7 +23,7 @@ export const desserializeUser = async (req: Request, res: Response, next: NextFu
 
         //se o não tivermos nenhum token o token é nulo
         if (!accessToken) {
-            return next(new AppError("You are not logged in", 401));
+            return next(new AppError("You are not logged in", 401, false));
         }
 
         //pegamos a validação ou não do token
@@ -27,7 +31,7 @@ export const desserializeUser = async (req: Request, res: Response, next: NextFu
         console.log(decoded);
         if (!decoded) {
             //se tivermos um nulo
-            return next(new AppError(`Invalid token or user doesn't exist`, 401));
+            return next(new AppError(`Invalid token or user doesn't exist`, 401, false));
         }
 
         //pegamos a sessão do REDIS (FUTURAMENTE)
@@ -42,7 +46,7 @@ export const desserializeUser = async (req: Request, res: Response, next: NextFu
         const user = await userService.findUserById(decoded.sub);
 
         if (!user) {
-            return next(new AppError(`User with that token no longer exist`, 401));
+            return next(new AppError(`User with that token no longer exist`, 401, false));
         }
 
         //salva o usuario no locals

@@ -44,7 +44,7 @@ const usersController = {
 
             //verufica se usuario foi criado com sucesso
             if (user) {
-                return res.json({ status: "sucess", data: { user } });
+                return res.json({ status: true, data: { user } });
             }
 
             return res.status(400).json({ status: false });
@@ -67,7 +67,7 @@ const usersController = {
 
             //se não existe ou as senhas não batem, mandamos um dos nossos erros com AppError
             if (!user || !(await user.comparePassword(req.body.password))) {
-                return next(new AppError("Invalid email or password", 401));
+                return next(new AppError("Invalid email or password", 401, false));
             }
 
             //se existe vamos usar o servico de usuario para criar um token

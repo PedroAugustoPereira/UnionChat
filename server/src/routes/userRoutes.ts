@@ -1,9 +1,9 @@
-import express from "express";
+import express from 'express';
 
-import userController from "../controllers/userController";
-import { desserializeUser } from "../middlewares/desserializeUser";
-import { requireUser } from "../middlewares/requireUser";
-import { restrictTo } from "../middlewares/restrictTo";
+import userController from '../controllers/userController';
+import { desserializeUser } from '../middlewares/desserializeUser';
+import { requireUser } from '../middlewares/requireUser';
+import { restrictTo } from '../middlewares/restrictTo';
 
 const userRouter = express.Router();
 

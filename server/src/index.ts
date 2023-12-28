@@ -12,7 +12,14 @@ import connectDB from "./utils/connectDB";
 const app = express();
 dotenv.config();
 
-app.use(cors());
+const corsOptions = {
+    origin: "http://localhost:5173", // Substitua pela origem do seu cliente
+    credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    allowedHeaders: "Content-Type,X-Requested-With,Authorization",
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 if (process.env.NODE_ENV === "development") app.use(morgan("dev"));

@@ -1,13 +1,24 @@
-import "react-toastify/dist/ReactToastify.css";
+import 'react-toastify/dist/ReactToastify.css';
 
-import { useState } from "react";
+import {
+  useEffect,
+  useState,
+} from 'react';
 
-import { Link, useNavigate } from "react-router-dom";
-import { toast, ToastContainer, ToastOptions } from "react-toastify";
-import styled from "styled-components";
+import {
+  Link,
+  useNavigate,
+} from 'react-router-dom';
+import {
+  toast,
+  ToastContainer,
+  ToastOptions,
+} from 'react-toastify';
+import styled from 'styled-components';
 
-import Logo from "../assets/logo.png";
-import authService, { userLogin } from "../services/authService";
+import Logo from '../assets/logo.png';
+import AuthMiddleware from '../middlewares/auth';
+import authService, { userLogin } from '../services/authService';
 
 const toastOptions: ToastOptions = {
   position: "top-right",
@@ -24,23 +35,43 @@ const Login = () => {
     password: "",
   });
 
-  const handleSubmit = async (data: React.FormEvent) => {
-    data.preventDefault();
-    console.log("entrou");
+  const isLoggedIn = async () => {
+    const logged = await AuthMiddleware();
+    if (logged.data) {
+      return true;
+    }
+
+    return false;
+  };
+
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      if (await isLoggedIn()) {
+        navigate("/chat");
+      }
+    };
+
+    checkLoginStatus();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (handleValidation()) {
-      console.log("validado");
       const { username, password } = values;
-      const { data } = await authService.login({
+
+      const data = await authService.login({
         username,
         password,
       });
 
-      if (data.status == false) {
-        toast.error(data.msg, toastOptions);
-      }
-      if (data.status == true) {
-        localStorage.setItem("union-app-user", JSON.stringify(data.user));
-        navigate("/");
+      if (
+        data.status === "error" ||
+        data.status === "fail" ||
+        data.status === false
+      ) {
+        toast.error(data.message, toastOptions);
+      } else {
+        navigate("/chat");
       }
     }
   };
@@ -61,7 +92,6 @@ const Login = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValues({ ...values, [e.target.name]: e.target.value });
-    console.log(values);
   };
 
   return (
